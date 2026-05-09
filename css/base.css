@@ -1,0 +1,48 @@
+:root{
+  --bg:#0a0a0a;
+  --bg-2:#141414;
+  --card:#1a1a1a;
+  --card-2:#222;
+  --border:#2a2a2a;
+  --text:#f5f5f0;
+  --muted:#888;
+  --dim:#555;
+  --accent:#ff4500;
+  --accent-2:#ffb800;
+  --green:#22c55e;
+  --red:#ef4444;
+  --blue:#3b82f6;
+  --safe-top:env(safe-area-inset-top);
+  --safe-bottom:env(safe-area-inset-bottom);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overscroll-behavior-y:contain}
+body{
+  font-family:'JetBrains Mono',monospace;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  min-height:100dvh;
+  padding-top:var(--safe-top);
+  padding-bottom:calc(80px + var(--safe-bottom));
+  -webkit-font-smoothing:antialiased;
+  position:relative;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  background:
+    radial-gradient(circle, rgba(255,255,255,.045) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 30% at 30% 0%, rgba(255,100,0,.16), transparent),
+    radial-gradient(ellipse 80% 15% at 50% 45%, rgba(255,184,0,.05), transparent),
+    radial-gradient(ellipse 60% 35% at 70% 100%, rgba(255,160,0,.12), transparent),
+    linear-gradient(180deg, #131210 0%, #0d0c0a 25%, #0a0a0a 50%, #080808 75%, #0a0908 100%);
+  background-size: 22px 22px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;background:var(--card-2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:15px;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
