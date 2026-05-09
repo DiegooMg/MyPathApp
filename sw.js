@@ -1,4 +1,4 @@
-const CACHE='mypath-v9';
+const CACHE='mypath-v10';
 const ASSETS=['./','./index.html','./manifest.json'];
 
 self.addEventListener('install',e=>{

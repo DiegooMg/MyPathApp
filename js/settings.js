@@ -34,7 +34,22 @@ function confirmWipe(){
 
 const AI_WORKER_URL='https://withered-hall-7512.diegomg1997.workers.dev';
 
+function checkGenerationLimit(){
+  // TODO: activar límite cuando haya backend
+  const gen=state.aiGenerations;
+  const now=new Date();
+  const lastReset=new Date(gen.lastReset+'T12:00:00');
+  if(now.getFullYear()!==lastReset.getFullYear()||now.getMonth()!==lastReset.getMonth()){
+    gen.count=0;
+    gen.lastReset=todayKey();
+  }
+  return true; // límite desactivado por ahora
+}
+
 async function generateAIRoutine(){
+  if(!checkGenerationLimit())return;
+
+  const includeCardio=document.getElementById('aiIncludeCardio').checked;
   const profile={
     name:document.getElementById('aiName').value||'Usuario',
     age:document.getElementById('aiAge').value||25,
@@ -43,9 +58,13 @@ async function generateAIRoutine(){
     sex:document.getElementById('aiSex').value,
     goal:document.getElementById('aiGoal').value,
     level:document.getElementById('aiLevel').value,
+    intensity:document.getElementById('aiIntensity').value,
     daysPerWeek:document.getElementById('aiDays').value,
     equipment:document.getElementById('aiEquipment').value,
     injuries:document.getElementById('aiInjuries').value||'ninguna',
+    includeAbs:document.getElementById('aiIncludeAbs').checked,
+    includeCardio,
+    cardioType:includeCardio?document.getElementById('aiCardioType').value:'N/A',
     notes:document.getElementById('aiNotes').value||'',
   };
 
@@ -89,6 +108,7 @@ async function generateAIRoutine(){
           reps:ex.reps||'10-12',
           rest:ex.rest||90,
           hint:ex.hint||'',
+          type:ex.type||'reps',
         })),
       };
     });
@@ -99,6 +119,8 @@ async function generateAIRoutine(){
       }
     }
 
+    state.aiGenerations.count++;
+    state.aiGenerations.lastReset=todayKey();
     save();
     state.selectedDay=null;
     save();

@@ -218,19 +218,19 @@
     <div class="ai-form-grid">
       <div class="ai-field">
         <label>Nombre</label>
-        <input type="text" id="aiName" placeholder="Tu nombre">
+        <input type="text" id="aiName" placeholder="Ej: Juan">
       </div>
       <div class="ai-field">
         <label>Edad</label>
-        <input type="number" id="aiAge" placeholder="28" inputmode="numeric">
+        <input type="number" id="aiAge" placeholder="Ej: 28" inputmode="numeric">
       </div>
       <div class="ai-field">
         <label>Peso (kg)</label>
-        <input type="number" id="aiWeight" placeholder="90" inputmode="decimal">
+        <input type="number" id="aiWeight" placeholder="Ej: 80" inputmode="decimal">
       </div>
       <div class="ai-field">
         <label>Altura (cm)</label>
-        <input type="number" id="aiHeight" placeholder="183" inputmode="numeric">
+        <input type="number" id="aiHeight" placeholder="Ej: 175" inputmode="numeric">
       </div>
     </div>
     <div class="ai-field">
@@ -255,7 +255,15 @@
       <select id="aiLevel">
         <option value="principiante">Principiante (0-1 año)</option>
         <option value="intermedio">Intermedio (1-3 años)</option>
-        <option value="avanzado" selected>Avanzado (3+ años)</option>
+        <option value="avanzado">Avanzado (3+ años)</option>
+      </select>
+    </div>
+    <div class="ai-field">
+      <label>Intensidad deseada</label>
+      <select id="aiIntensity">
+        <option value="suave">Suave — menos volumen, más descanso</option>
+        <option value="moderada" selected>Moderada — equilibrio volumen/intensidad</option>
+        <option value="alta">Alta — volumen máximo, técnicas avanzadas</option>
       </select>
     </div>
     <div class="ai-form-grid">
@@ -263,7 +271,7 @@
         <label>Días/semana</label>
         <select id="aiDays">
           <option value="3">3 días</option>
-          <option value="4" selected>4 días</option>
+          <option value="4">4 días</option>
           <option value="5">5 días</option>
           <option value="6">6 días</option>
         </select>
@@ -281,6 +289,24 @@
     <div class="ai-field">
       <label>Lesiones o limitaciones</label>
       <input type="text" id="aiInjuries" placeholder="Ej: artritis en tobillos, dolor lumbar…">
+    </div>
+    <div style="display:flex;gap:20px;margin:10px 0">
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer">
+        <input type="checkbox" id="aiIncludeAbs" checked style="width:16px;height:16px;accent-color:var(--accent)">
+        Incluir abdominales
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer">
+        <input type="checkbox" id="aiIncludeCardio" checked onchange="document.getElementById('aiCardioTypeWrap').style.display=this.checked?'block':'none'" style="width:16px;height:16px;accent-color:var(--accent)">
+        Incluir cardio
+      </label>
+    </div>
+    <div id="aiCardioTypeWrap" class="ai-field">
+      <label>Tipo de cardio</label>
+      <select id="aiCardioType">
+        <option value="LISS">LISS (cardio de baja intensidad)</option>
+        <option value="HIIT">HIIT (intervalos de alta intensidad)</option>
+        <option value="Mixto">Mixto (LISS + HIIT)</option>
+      </select>
     </div>
     <div class="ai-field">
       <label>Notas adicionales</label>

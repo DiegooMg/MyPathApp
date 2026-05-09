@@ -13,8 +13,9 @@ function load(){
       selectedDay:s.selectedDay||null,
       lastCycle:s.lastCycle||'torso',
       theme:s.theme||'orange',
+      aiGenerations:s.aiGenerations||{count:0,lastReset:'2000-01-01'},
     };
-  }catch(e){return {sessions:{},bodyweight:[],nutrition:{},customExercises:{},customRoutine:{},selectedDay:null,lastCycle:'torso',theme:'orange'}}
+  }catch(e){return {sessions:{},bodyweight:[],nutrition:{},customExercises:{},customRoutine:{},selectedDay:null,lastCycle:'torso',theme:'orange',aiGenerations:{count:0,lastReset:'2000-01-01'}}}
 }
 function save(){localStorage.setItem(STORE_KEY,JSON.stringify(state))}
 
