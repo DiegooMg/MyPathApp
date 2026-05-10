@@ -73,7 +73,7 @@ async function generateAIRoutine(){
   btn.disabled=true;
   status.style.display='block';
   status.style.color='var(--muted)';
-  status.textContent='⏳ Generando rutina con Claude AI…';
+  status.textContent='⏳ PathIA está generando tu rutina…';
 
   try{
     const res=await fetch(AI_WORKER_URL,{
@@ -125,14 +125,19 @@ async function generateAIRoutine(){
     state.selectedDay=null;
     save();
     renderTraining();
-    status.textContent='✓ ¡Rutina aplicada! Revisa la pestaña de Entreno.';
+    status.textContent='✓ PathIA generó tu rutina correctamente. Revisa la pestaña de Entreno.';
     status.style.color='var(--green)';
-    toast('✓ Rutina generada y aplicada');
+    toast('✓ PathIA: rutina aplicada');
 
   }catch(err){
-    status.textContent='✗ Error: '+err.message;
+    status.textContent='✗ PathIA no pudo generar la rutina. Intentá de nuevo.';
     status.style.color='var(--red)';
   }finally{
     btn.disabled=false;
   }
+}
+
+function toggleGuide(el){
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('open');
 }

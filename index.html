@@ -211,9 +211,9 @@
 
   <!-- AI ROUTINE GENERATOR -->
   <div class="card">
-    <div class="card-head"><div class="card-title card-title-accent">🤖 Generador IA</div></div>
+    <div class="card-head"><div class="card-title card-title-accent">🤖 PathIA</div></div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">
-      Genera una rutina personalizada con Claude AI. Reemplazará tu rutina actual.
+      Genera una rutina de entrenamiento personalizada. Reemplazará tu rutina actual.
     </div>
     <div class="ai-form-grid">
       <div class="ai-field">
@@ -313,7 +313,7 @@
       <input type="text" id="aiNotes" placeholder="Ej: prefiero más volumen en pierna, sin mañanas…">
     </div>
     <button id="aiGenerateBtn" class="btn-add" style="width:100%;margin-top:6px;padding:14px;font-size:12px;letter-spacing:2px" onclick="generateAIRoutine()">
-      GENERAR RUTINA CON IA
+      GENERAR CON PATHIA
     </button>
     <div id="aiStatus" class="ai-status"></div>
   </div>
@@ -358,6 +358,79 @@
     <div class="card-head"><div class="card-title">Info</div></div>
     <div style="font-size:11px;color:var(--muted);line-height:1.7">
       Rutina basada en informe de recomposición corporal (Abril 2026). Upper/Lower 4 días + día 6 opcional. Macros ciclados según día. Todos los datos se guardan localmente en tu dispositivo.
+    </div>
+  </div>
+
+  <!-- GUIDE -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">📖 Guía MyPath</div></div>
+
+    <div class="guide-sec">
+      <button class="guide-sec-head" onclick="toggleGuide(this)">Conceptos básicos<span class="guide-arrow">›</span></button>
+      <div class="guide-sec-body">
+        <button class="guide-item-head" onclick="toggleGuide(this)">RIR — Reps In Reserve<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>RIR indica cuántas repeticiones te quedan al terminar una serie. RIR 2 = podés hacer 2 más antes de fallar. Para hipertrofia, trabajar entre RIR 1-3 es el rango óptimo. Más RIR = menos intensidad, ideal para calentamiento o deload.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">RPE — Esfuerzo percibido<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Escala del 1 al 10 donde RPE 10 es fallo total y RPE 7 son ~3 reps en reserva. Es subjetivo pero útil para autorregular la carga según el día. Equivalencia: RPE 8 ≈ RIR 2, RPE 9 ≈ RIR 1. Preferí RIR para mayor precisión.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Series efectivas vs calentamiento<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Las series efectivas generan la tensión necesaria para crecer (RIR ≤ 4). Las de calentamiento preparan el sistema nervioso pero no cuentan como volumen. Hacé 2-4 series progresivas de calentamiento antes de tus series de trabajo reales.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Frecuencia y volumen semanal<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Cada músculo necesita 10-20 series semanales para crecer, repartidas en 2-3 sesiones (frecuencia 2x). Más de 20 series puede ser contraproducente. La frecuencia 2x permite más series totales con mejor calidad que una sola sesión larga.</p></div>
+      </div>
+    </div>
+
+    <div class="guide-sec">
+      <button class="guide-sec-head" onclick="toggleGuide(this)">Técnicas avanzadas<span class="guide-arrow">›</span></button>
+      <div class="guide-sec-body">
+        <button class="guide-item-head" onclick="toggleGuide(this)">Drop set<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Llegás al fallo, reducís el peso un 20-30% y continuás sin descanso. Genera mucho volumen en poco tiempo. Usalo con máquinas o mancuernas, máximo 1-2 por sesión, y al final de ejercicios de aislamiento. Evitalo en compuestos pesados.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Rest-pause<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Llegás a RIR 1-2, descansás 15-20 segundos y completás más reps con el mismo peso. Una serie de rest-pause equivale a ~2 series normales. Ideal para aislamiento. Evitalo en compuestos pesados por riesgo técnico.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Myo-reps<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Serie de activación de 15-25 reps a RIR 1-2, luego mini-series de 3-5 reps con 5 respiraciones de descanso hasta no mantener el conteo. Excelente para bombeo y acumulación de volumen con cargas moderadas (40-60% 1RM).</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Series cluster<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Dividís una serie pesada en mini-bloques de 2-3 reps con 15-20 seg de descanso, manteniendo el peso. Permite mover cargas muy altas con mejor técnica. Ideal en sentadilla, press y peso muerto cuando el objetivo es fuerza máxima.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Parciales estirados<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Repeticiones en el rango de máximo estiramiento muscular, sin llegar a la posición de máxima contracción. El músculo genera más tensión en posición estirada. Evidencia reciente muestra mayor hipertrofia que el rango completo en varios músculos.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Tempo lento<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Controlás la velocidad de cada fase. Notación 3-1-2 = 3 seg excéntrico, 1 seg pausa, 2 seg concéntrico. La fase excéntrica lenta aumenta el tiempo bajo tensión y el daño muscular. No apliques tempo en todos los ejercicios; reservalo para fases de deload o aislamiento.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Pre-fatiga y post-fatiga<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Pre-fatiga: aislás un músculo débil antes del compuesto para que sea el limitante (ej: extensiones antes de sentadilla). Post-fatiga: agotar después del compuesto (ej: curl femoral después del RDL). Útil para mejorar la conexión mente-músculo en músculos rezagados.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Al fallo — cuándo conviene<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>El estímulo de crecimiento ocurre en las últimas 5 reps antes del fallo, por lo que no siempre hace falta llegar ahí. El fallo genera más fatiga, técnica deficiente y mayor recuperación. Reservalo para la última serie de aislamiento, nunca en compuestos pesados.</p></div>
+      </div>
+    </div>
+
+    <div class="guide-sec">
+      <button class="guide-sec-head" onclick="toggleGuide(this)">Aproximación<span class="guide-arrow">›</span></button>
+      <div class="guide-sec-body">
+        <button class="guide-item-head" onclick="toggleGuide(this)">Qué es y para qué sirve<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>La aproximación prepara el sistema nervioso y muscular de forma progresiva antes del primer set real. No cuenta como volumen de entrenamiento pero es esencial para rendir bien y evitar lesiones, especialmente en ejercicios compuestos.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Cómo hacer una buena aproximación<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Empezá con barra sola o peso muy ligero y subí en escalones del 20-30%. Reducí reps conforme sube el peso. La última aproximación debería ser al 90-95% del peso de trabajo con 1-2 reps. Descansá 2-3 minutos antes del primer set real.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Cuántas series y con qué peso<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Para pesos de trabajo menores a 80 kg: 2-3 series. Para pesos mayores: 4-5 series. Ejemplo para 80 kg: 20 kg × 10, 40 kg × 6, 60 kg × 4, 76 kg × 2. No acumules fatiga innecesaria antes de los sets de trabajo real.</p></div>
+      </div>
+    </div>
+
+    <div class="guide-sec">
+      <button class="guide-sec-head" onclick="toggleGuide(this)">Uso de la app<span class="guide-arrow">›</span></button>
+      <div class="guide-sec-body">
+        <button class="guide-item-head" onclick="toggleGuide(this)">Cómo registrar una sesión<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Pestaña Entreno → seleccioná el día arriba → ingresá peso y reps en cada set → tocá el checkbox ✓ para marcarlo como completado. El timer de descanso arranca automáticamente. Podés agregar notas por ejercicio tocando el ícono de nota.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Cómo usar el timer de descanso<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>El timer aparece al completar un set y muestra el tiempo de descanso de ese ejercicio. Tocá +30 para agregar tiempo. Al terminar vibra el móvil y suenan 3 pitidos. Podés cerrarlo con la X si querés saltear el descanso.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Cómo editar un ejercicio (sesión)<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Tocá el ícono ✏️ en la cabecera del ejercicio. Podés cambiar nombre, series, reps, descanso y tipo (reps/tiempo). Los cambios son solo para esa sesión del día; mañana vuelve al ejercicio original de la rutina.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Cómo usar ejercicios alternativos<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Tocá el botón 🔄 en la cabecera del ejercicio para rotar entre el original y hasta 2 alternativas predefinidas. Útil cuando no tenés el equipamiento disponible o querés variar el estímulo sin modificar la rutina permanentemente.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Cómo usar el editor de rutina<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Pestaña ⚙️ → Editor de rutina. Podés agregar ejercicios de la biblioteca, crear custom, cambiar el orden o eliminarlos. Los cambios son permanentes. Para una rutina completamente nueva, usá PathIA en la sección de arriba.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Cómo exportar y hacer backup<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>Pestaña ⚙️ → Datos → Exportar datos. Descarga un JSON con todo tu historial (sesiones, peso, nutrición, rutina). Guardalo antes de cambiar de dispositivo o limpiar el navegador. Para restaurar, usá Importar datos.</p></div>
+        <button class="guide-item-head" onclick="toggleGuide(this)">Cómo instalar la app en el móvil<span class="guide-arrow">›</span></button>
+        <div class="guide-item-body"><p>iPhone (Safari): Botón Compartir → Añadir a pantalla de inicio. Android (Chrome): Menú ⋮ → Añadir a pantalla de inicio o Instalar app. Una vez instalada funciona offline. Si hay una actualización, cerrá y reabría la app para forzar la recarga.</p></div>
+      </div>
     </div>
   </div>
 </div>
