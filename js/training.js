@@ -45,6 +45,27 @@ function renderTraining(){
     });
   }
 
+  /* Build PR map from all sessions EXCEPT today */
+  const exBest={};
+  Object.entries(state.sessions).forEach(([dk2,dayMap])=>{
+    if(dk2===dateKey)return;
+    Object.values(dayMap).forEach(exMap=>{
+      Object.entries(exMap).forEach(([id,data])=>{
+        if(id==='_custom'||!data||!data.sets)return;
+        data.sets.forEach(s=>{
+          if(s.w!==''&&s.r!==''){
+            const w=parseFloat(s.w);const r=parseInt(s.r);
+            if(!isNaN(w)&&!isNaN(r)&&w>0){
+              if(!exBest[id]||w>exBest[id].w||(w===exBest[id].w&&r>exBest[id].r)){
+                exBest[id]={w,r};
+              }
+            }
+          }
+        });
+      });
+    });
+  });
+
   allExercises.forEach((exOrig,idx)=>{
     const override=(sessionData[exOrig.id]&&sessionData[exOrig.id].override)||{};
     const ex={
@@ -129,6 +150,7 @@ function renderTraining(){
         <div style="flex:1;min-width:0">
           <div class="ex-name-row">
             <div class="exercise-name">${escapeHTML(ex.name)}</div>
+            ${exBest[exOrig.id]?`<span class="ex-pr-badge">🏆 ${exBest[exOrig.id].w}kg×${exBest[exOrig.id].r}</span>`:''}
           </div>
           <div class="prescr-chips">
             <span class="prescr-chip ${modified&&(override.sets||override.reps)?'modified':''}" onclick="openEditModal(${day},'${ex.id}')">${ex.sets}×${ex.reps} <span class="pencil">✎</span></span>
@@ -143,7 +165,8 @@ function renderTraining(){
       </div>
       <div class="approach-row ${data.approach?'done':''}" onclick="toggleApproach(${day},'${ex.id}')">
         <div class="approach-check">${data.approach?'✓':''}</div>
-        <div>Aproximación realizada</div>
+        <div style="flex:1">Aproximación realizada</div>
+        <button class="btn-sm" style="margin:0;padding:3px 10px;font-size:10px" onclick="event.stopPropagation();startTimer(state.approachTimerSec||120)">⏱ ${formatTime(state.approachTimerSec||120)}</button>
       </div>
       ${data.skipped?`<div style="padding:12px;background:rgba(239,68,68,.08);border:1px solid var(--red);border-radius:8px;font-size:12px;color:var(--red);text-align:center">Ejercicio omitido · queda registrado en el historial</div>`:`
       <div class="sets">
@@ -180,30 +203,28 @@ function updateSetCascade(day,exId,idx,field,val){
   const dk=dateKeyForDay(day);
   const data=state.sessions[dk][day][exId];
   data.sets[idx][field]=val;
-  if(idx===0 && val!==''){
-    for(let i=1;i<data.sets.length;i++){
+  if(val!==''){
+    for(let i=idx+1;i<data.sets.length;i++){
       if(!data.sets[i].d && (data.sets[i][field]==='' || data.sets[i].cascaded)){
         data.sets[i][field]=val;
         data.sets[i].cascaded=true;
       }
     }
-    syncCascadeDOM(exId,data.sets,field);
+    syncCascadeDOM(exId,data.sets,field,idx+1);
     save();
     return;
   }
-  if(idx>0){
-    data.sets[idx].cascaded=false;
-  }
+  data.sets[idx].cascaded=false;
   save();
 }
 
-function syncCascadeDOM(exId,sets,field){
+function syncCascadeDOM(exId,sets,field,fromIdx=0){
   const card=document.querySelector(`[data-exid="${exId}"]`);
   if(!card)return;
   const inputs=card.querySelectorAll(`.set-input[data-field="${field}"]`);
   inputs.forEach(inp=>{
     const i=parseInt(inp.dataset.idx);
-    if(i>0 && sets[i]){
+    if(i>=fromIdx && sets[i]){
       inp.value=sets[i][field];
       inp.classList.toggle('filled',sets[i][field]!=='');
       inp.classList.remove('prefilled');

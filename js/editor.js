@@ -1,11 +1,75 @@
 let editorDay=1;
+let editorSortLocked=true;
 
 function openRoutineEditor(){
+  editorSortLocked=true;
   editorDay=state.selectedDay||todayDayNum();
   document.getElementById('modalEditor').classList.add('open');
   renderEditorDayTabs();
   renderEditorExList();
   renderLibrary();
+  updateSortBtn();
+}
+
+function updateSortBtn(){
+  const btn=document.getElementById('editorSortBtn');
+  if(!btn)return;
+  btn.textContent=editorSortLocked?'🔒 Ordenar':'🔓 Ordenar';
+  btn.classList.toggle('primary',!editorSortLocked);
+}
+
+function toggleEditorSort(){
+  editorSortLocked=!editorSortLocked;
+  updateSortBtn();
+  renderEditorDayTabs();
+  renderEditorExList();
+}
+
+/* Generic pointer-events drag-to-reorder.
+   Items need data-sortable="true". Handle is matched by handleSel (or whole item if null).
+   Uses property assignment to avoid duplicate listeners on re-render. */
+function makeSortable(container,onDrop,axis,handleSel){
+  let dragEl=null,fromIdx=-1;
+  function getItems(){return [...container.querySelectorAll('[data-sortable]')]}
+
+  container.onpointerdown=e=>{
+    if(editorSortLocked)return;
+    const trigger=handleSel?e.target.closest(handleSel):e.target.closest('[data-sortable]');
+    if(!trigger)return;
+    const item=handleSel?trigger.closest('[data-sortable]'):trigger;
+    if(!item)return;
+    e.preventDefault();
+    dragEl=item;
+    fromIdx=getItems().indexOf(item);
+    dragEl.classList.add('sort-dragging');
+    try{container.setPointerCapture(e.pointerId)}catch(_){}
+  };
+
+  container.onpointermove=e=>{
+    if(!dragEl)return;
+    const pos=axis==='x'?e.clientX:e.clientY;
+    const others=getItems().filter(el=>el!==dragEl);
+    let placed=false;
+    for(const el of others){
+      const box=el.getBoundingClientRect();
+      const mid=axis==='x'?box.left+box.width/2:box.top+box.height/2;
+      if(pos<mid){container.insertBefore(dragEl,el);placed=true;break}
+    }
+    if(!placed&&others.length)container.appendChild(dragEl);
+  };
+
+  container.onpointerup=e=>{
+    if(!dragEl)return;
+    const toIdx=getItems().indexOf(dragEl);
+    dragEl.classList.remove('sort-dragging');
+    const fi=fromIdx;dragEl=null;fromIdx=-1;
+    if(toIdx!==fi&&fi>=0)onDrop(fi,toIdx);
+  };
+
+  container.onpointercancel=()=>{
+    if(dragEl)dragEl.classList.remove('sort-dragging');
+    dragEl=null;fromIdx=-1;
+  };
 }
 
 function renderEditorDayTabs(){
@@ -15,10 +79,31 @@ function renderEditorDayTabs(){
     const r=getEffectiveRoutineDay(i);
     const btn=document.createElement('button');
     btn.className='editor-day-tab'+(i===editorDay?' active':'');
-    btn.innerHTML=`D${i}<br><span style="font-size:9px;opacity:.7">${r.name.split(' ')[0]}</span>`;
-    btn.onclick=()=>{editorDay=i;renderEditorDayTabs();renderEditorExList();renderLibrary()};
+    btn.setAttribute('data-sortable','true');
+    btn.style.touchAction=editorSortLocked?'':'none';
+    const dragIcon=editorSortLocked?'':'<span style="font-size:10px;opacity:.5;margin-right:2px">⠿</span>';
+    btn.innerHTML=`${dragIcon}D${i}<br><span style="font-size:9px;opacity:.7">${r.name.split(' ')[0]}</span>`;
+    if(editorSortLocked){
+      btn.onclick=()=>{editorDay=i;renderEditorDayTabs();renderEditorExList();renderLibrary()};
+    }
     tabs.appendChild(btn);
   }
+  makeSortable(tabs,reorderDays,'x',null);
+}
+
+function reorderDays(fromIdx,toIdx){
+  for(let i=1;i<=7;i++)ensureCustomRoutine(i);
+  const dayData=[];
+  for(let i=1;i<=7;i++)dayData.push({...state.customRoutine[i]});
+  const moved=dayData.splice(fromIdx,1)[0];
+  dayData.splice(toIdx,0,moved);
+  dayData.forEach((data,i)=>{state.customRoutine[i+1]=data});
+  if(editorDay===fromIdx+1)editorDay=toIdx+1;
+  save();
+  renderEditorDayTabs();
+  renderEditorExList();
+  renderTraining();
+  toast('Días reordenados');
 }
 
 function getEffectiveRoutineDay(day){
@@ -47,11 +132,12 @@ function renderEditorExList(){
     list.innerHTML='<div style="color:var(--muted);font-size:12px;padding:10px">Sin ejercicios. Añadí de la biblioteca.</div>';
     return;
   }
+  const dragStyle=editorSortLocked?'color:var(--dim);cursor:default':'color:var(--accent);cursor:grab';
   list.innerHTML=exercises.map((ex,idx)=>{
     const isCustom=ex.id&&ex.id.startsWith('custom_');
     return `
-      <div class="editor-ex-item${isCustom?' custom-persist':''}">
-        <span class="editor-ex-drag">⠿</span>
+      <div class="editor-ex-item${isCustom?' custom-persist':''}" data-sortable="true" style="${editorSortLocked?'':'touch-action:none'}">
+        <span class="editor-ex-drag sort-handle" style="${dragStyle}">⠿</span>
         <div class="editor-ex-name">
           <div style="font-size:13px">${escapeHTML(ex.name)}</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px">${ex.sets}×${ex.reps}${ex.rest?' · '+formatTime(ex.rest):''}</div>
@@ -61,17 +147,31 @@ function renderEditorExList(){
       </div>
     `;
   }).join('');
+  makeSortable(list,reorderExercises,'y','.sort-handle');
+}
+
+function reorderExercises(fromIdx,toIdx){
+  ensureCustomRoutine(editorDay);
+  const allEx=getEditorExercises(editorDay);
+  const moved=allEx.splice(fromIdx,1)[0];
+  allEx.splice(toIdx,0,moved);
+  state.customRoutine[editorDay].exercises=allEx;
+  if(state.customExercises&&state.customExercises[editorDay]){
+    delete state.customExercises[editorDay];
+  }
+  save();
+  renderEditorExList();
+  renderTraining();
+  toast('Orden actualizado');
 }
 
 function removeExFromDay(day,exId,isCustom){
-  if(isCustom){
-    if(state.customExercises&&state.customExercises[day]){
-      state.customExercises[day]=state.customExercises[day].filter(e=>e.id!==exId);
-      if(!state.customExercises[day].length)delete state.customExercises[day];
-    }
-  }else{
-    ensureCustomRoutine(day);
-    state.customRoutine[day].exercises=state.customRoutine[day].exercises.filter(e=>e.id!==exId);
+  ensureCustomRoutine(day);
+  const inRoutine=state.customRoutine[day].exercises.some(e=>e.id===exId);
+  state.customRoutine[day].exercises=state.customRoutine[day].exercises.filter(e=>e.id!==exId);
+  if(!inRoutine&&isCustom&&state.customExercises&&state.customExercises[day]){
+    state.customExercises[day]=state.customExercises[day].filter(e=>e.id!==exId);
+    if(!state.customExercises[day].length)delete state.customExercises[day];
   }
   save();
   renderEditorExList();

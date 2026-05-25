@@ -137,6 +137,18 @@ async function generateAIRoutine(){
   }
 }
 
+function setApproachTimer(v){
+  const val=parseInt(v);
+  if(!val||val<15||val>600)return;
+  state.approachTimerSec=val;
+  save();
+}
+
+function renderSettings(){
+  const inp=document.getElementById('approachTimerInput');
+  if(inp)inp.value=state.approachTimerSec||120;
+}
+
 function toggleGuide(el){
   el.classList.toggle('open');
   el.nextElementSibling.classList.toggle('open');

@@ -7,7 +7,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.getElementById('page-'+t.dataset.page).classList.add('active');
     if(t.dataset.page==='progress'){renderProgress()}
     if(t.dataset.page==='nutri'){renderNutrition()}
-    if(t.dataset.page==='settings'){renderThemeGrid()}
+    if(t.dataset.page==='settings'){renderThemeGrid();renderSettings()}
   });
 });
 

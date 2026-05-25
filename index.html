@@ -216,6 +216,22 @@
     <div id="themeGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
   </div>
 
+  <div class="card">
+    <div class="card-head"><div class="card-title">Entrenamiento</div></div>
+    <div class="setting-item">
+      <div>
+        <div>⏱ Timer de aproximación</div>
+        <div class="desc">Duración al pulsar el timer de aproximación</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="number" id="approachTimerInput" min="15" max="600" step="15" inputmode="numeric"
+          style="width:58px;padding:6px 4px;text-align:center;font-size:14px" value="120"
+          oninput="setApproachTimer(this.value)">
+        <span style="font-size:11px;color:var(--muted)">seg</span>
+      </div>
+    </div>
+  </div>
+
   <!-- AI ROUTINE GENERATOR -->
   <div class="card">
     <div class="card-head"><div class="card-title card-title-accent">🤖 PathIA</div></div>
@@ -578,6 +594,10 @@
     </div>
     <div class="modal-sub">Los cambios son permanentes en tu rutina</div>
 
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase">Días de la semana</div>
+      <button id="editorSortBtn" class="btn-sm" onclick="toggleEditorSort()" style="font-size:10px;padding:4px 10px">🔒 Ordenar</button>
+    </div>
     <div class="editor-day-tabs" id="editorDayTabs"></div>
 
     <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Ejercicios del día</div>

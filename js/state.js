@@ -14,8 +14,9 @@ function load(){
       lastCycle:s.lastCycle||'torso',
       theme:s.theme||'orange',
       aiGenerations:s.aiGenerations||{count:0,lastReset:'2000-01-01'},
+      approachTimerSec:s.approachTimerSec||120,
     };
-  }catch(e){return {sessions:{},bodyweight:[],nutrition:{},customExercises:{},customRoutine:{},selectedDay:null,lastCycle:'torso',theme:'orange',aiGenerations:{count:0,lastReset:'2000-01-01'}}}
+  }catch(e){return {sessions:{},bodyweight:[],nutrition:{},customExercises:{},customRoutine:{},selectedDay:null,lastCycle:'torso',theme:'orange',aiGenerations:{count:0,lastReset:'2000-01-01'},approachTimerSec:120}}
 }
 function save(){localStorage.setItem(STORE_KEY,JSON.stringify(state))}
 
