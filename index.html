@@ -187,12 +187,19 @@
 
   <div class="chart-wrap">
     <div class="chart-title">Progreso por ejercicio</div>
-    <div class="chart-sub">Peso máximo por sesión</div>
-    <select class="ex-picker" id="exPicker" onchange="drawExerciseChart()"></select>
-    <div class="chart">
+    <div class="chart-sub" id="exChartSub">Cargando ejercicios…</div>
+    <div class="ex-picker-wrap">
+      <select class="ex-picker" id="exPicker" onchange="drawExerciseChart()"></select>
+      <span class="ex-picker-arrow">▼</span>
+    </div>
+    <div class="chart" style="margin-top:10px">
       <canvas id="exChart"></canvas>
     </div>
-    <div id="exHistory" style="margin-top:10px"></div>
+    <div id="exHistory"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="ex-export-btn" onclick="exportExerciseProgress()">📊 Exportar ejercicio</button>
+      <button class="ex-export-btn" onclick="exportAllProgress()">📦 Exportar todo</button>
+    </div>
   </div>
 </div>
 

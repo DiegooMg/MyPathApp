@@ -215,16 +215,66 @@
 .stat-sub{font-size:10px;color:var(--muted);margin-top:2px}
 
 /* Exercise picker */
+.ex-picker-wrap{
+  position:relative;
+  margin-bottom:4px;
+}
+.ex-picker-arrow{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
+  color:var(--accent);
+  font-size:11px;
+  font-weight:700;
+}
 .ex-picker{
   width:100%;
-  padding:10px;
+  padding:12px 36px 12px 12px;
   background:var(--card-2);
-  border:1px solid var(--border);
+  border:1px solid var(--accent);
   border-radius:8px;
   font-size:13px;
   color:var(--text);
-  margin-bottom:10px;
+  appearance:none;
+  -webkit-appearance:none;
+  cursor:pointer;
 }
+.ex-picker:focus{outline:none;border-color:var(--accent-2)}
+
+/* Export buttons */
+.ex-export-btn{
+  flex:1;
+  padding:10px 8px;
+  background:var(--card-2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:10px;
+  letter-spacing:1px;
+  color:var(--muted);
+  text-transform:uppercase;
+  text-align:center;
+  cursor:pointer;
+}
+.ex-export-btn:active{opacity:.7;transform:scale(.98)}
+
+/* Exercise history */
+.history-item{
+  padding:10px 0;
+  border-top:1px solid var(--border);
+}
+.history-item:first-child{border-top:none;padding-top:6px}
+.history-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:3px;
+}
+.history-date{font-size:11px;color:var(--muted)}
+.history-max{font-size:13px;color:var(--accent-2);font-weight:700;font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+.history-sets{font-size:11px;color:var(--text);line-height:1.6;margin-bottom:2px}
+.history-vol{font-size:10px;color:var(--dim);letter-spacing:1px}
 
 /* Weight entry */
 .weight-entry{
