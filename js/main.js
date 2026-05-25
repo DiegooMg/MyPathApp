@@ -24,6 +24,9 @@ document.getElementById('modalAdd').addEventListener('click',e=>{
 document.getElementById('modalEditor').addEventListener('click',e=>{
   if(e.target.id==='modalEditor')closeModal('modalEditor');
 });
+document.getElementById('modalAltPicker').addEventListener('click',e=>{
+  if(e.target.id==='modalAltPicker')closeModal('modalAltPicker');
+});
 
 /* Init */
 renderHeader();

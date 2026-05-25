@@ -15,8 +15,9 @@ function load(){
       theme:s.theme||'orange',
       aiGenerations:s.aiGenerations||{count:0,lastReset:'2000-01-01'},
       approachTimerSec:s.approachTimerSec||120,
+      customAlternatives:s.customAlternatives||{},
     };
-  }catch(e){return {sessions:{},bodyweight:[],nutrition:{},customExercises:{},customRoutine:{},selectedDay:null,lastCycle:'torso',theme:'orange',aiGenerations:{count:0,lastReset:'2000-01-01'},approachTimerSec:120}}
+  }catch(e){return {sessions:{},bodyweight:[],nutrition:{},customExercises:{},customRoutine:{},selectedDay:null,lastCycle:'torso',theme:'orange',aiGenerations:{count:0,lastReset:'2000-01-01'},approachTimerSec:120,customAlternatives:{}}}
 }
 function save(){localStorage.setItem(STORE_KEY,JSON.stringify(state))}
 

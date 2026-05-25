@@ -7,13 +7,14 @@ function buildIdNames(){
   if(state.customRoutine)Object.values(state.customRoutine).forEach(d=>{if(d.exercises)d.exercises.forEach(e=>m[e.id]=e.name)});
   // 3. Persistent custom exercises
   if(state.customExercises)Object.values(state.customExercises).forEach(arr=>arr.forEach(e=>{if(e&&e.id&&e.name)m[e.id]=e.name}));
-  // 4. Session-level _custom arrays and session override names (most specific, runs last)
+  // 4. Session-level _custom arrays, override names, and alt exercise names
   Object.values(state.sessions).forEach(dayMap=>{
     Object.values(dayMap).forEach(exMap=>{
       if(exMap._custom)exMap._custom.forEach(e=>{if(e&&e.id&&e.name)m[e.id]=e.name});
       Object.entries(exMap).forEach(([id,data])=>{
         if(id==='_custom'||!data)return;
         if(data.override&&data.override.name)m[id]=data.override.name;
+        if(id.startsWith('alt_')&&data._name)m[id]=data._name;
       });
     });
   });

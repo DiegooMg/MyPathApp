@@ -585,6 +585,20 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ALTERNATIVE PICKER MODAL -->
+<div class="modal-bg" id="modalAltPicker">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="modal-title">Elegir ejercicio</div>
+      <button onclick="closeModal('modalAltPicker')" style="font-size:22px;color:var(--muted);padding:4px">✕</button>
+    </div>
+    <div class="lib-search">
+      <input type="text" id="altPickerSearch" placeholder="Buscar ejercicio…" oninput="renderAltPicker()">
+    </div>
+    <div id="altPickerList" style="max-height:60vh;overflow-y:auto;padding-right:2px"></div>
+  </div>
+</div>
+
 <!-- ROUTINE EDITOR MODAL -->
 <div class="modal-bg" id="modalEditor" style="align-items:flex-start;padding-top:0">
   <div class="modal" style="border-radius:0 0 20px 20px;max-height:95vh;padding-top:calc(20px + var(--safe-top))" onclick="event.stopPropagation()">

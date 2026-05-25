@@ -1,3 +1,105 @@
+/* ===== ALTERNATIVE PICKER ===== */
+function makeAltId(name){
+  return 'alt_'+name.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'_')
+    .replace(/^_|_$/g,'');
+}
+
+let altPickerDay=null,altPickerSlotId=null,altPickerOrigName='';
+
+function openAltPicker(day,slotId,origName){
+  altPickerDay=day;
+  altPickerSlotId=slotId;
+  altPickerOrigName=origName;
+  document.getElementById('altPickerSearch').value='';
+  renderAltPicker();
+  document.getElementById('modalAltPicker').classList.add('open');
+}
+
+function renderAltPicker(){
+  const query=(document.getElementById('altPickerSearch').value||'').toLowerCase().trim();
+  const slotId=altPickerSlotId;
+  const origName=altPickerOrigName;
+  const dk=dateKeyForDay(altPickerDay);
+  const dayData=(state.sessions[dk]&&state.sessions[dk][altPickerDay])||{};
+  const activeAlt=(dayData[slotId]&&dayData[slotId].activeAlt)||null;
+
+  const predefined=ALTERNATIVES[slotId]||[];
+  const custom=(state.customAlternatives&&state.customAlternatives[slotId])||[];
+  const known=[origName,...predefined,...custom].filter((n,i,a)=>a.indexOf(n)===i);
+  const filteredKnown=query?known.filter(n=>n.toLowerCase().includes(query)):known;
+
+  let html='';
+  if(filteredKnown.length){
+    html+='<div class="lib-group-title" style="margin-bottom:8px">Conocidos</div>';
+    filteredKnown.forEach(name=>{
+      const aid=name===origName?null:makeAltId(name);
+      const isActive=aid?activeAlt===aid:!activeAlt;
+      html+=`<div class="lib-ex-item${isActive?' added':''}" data-alt="${escapeHTML(name)}">
+        <div>
+          <div>${escapeHTML(name)}</div>
+          ${name===origName?'<div style="font-size:10px;color:var(--muted)">Ejercicio original</div>':''}
+        </div>
+        <span class="lib-add-btn">${isActive?'✓':'→'}</span>
+      </div>`;
+    });
+  }
+
+  html+='<div class="lib-group-title" style="margin:12px 0 8px">Biblioteca</div>';
+  Object.entries(EXERCISE_LIBRARY).forEach(([group,exercises])=>{
+    const notInKnown=exercises.filter(ex=>
+      (!query||ex.name.toLowerCase().includes(query))&&
+      !known.some(k=>k.toLowerCase()===ex.name.toLowerCase())
+    );
+    if(!notInKnown.length)return;
+    html+=`<div class="lib-group"><div class="lib-group-title">${group}</div>`;
+    notInKnown.forEach(ex=>{
+      html+=`<div class="lib-ex-item" data-alt="${escapeHTML(ex.name)}">
+        <div>
+          <div>${escapeHTML(ex.name)}</div>
+          <div style="font-size:10px;color:var(--muted)">${ex.sets}×${ex.reps}</div>
+        </div>
+        <span class="lib-add-btn">→</span>
+      </div>`;
+    });
+    html+='</div>';
+  });
+
+  const container=document.getElementById('altPickerList');
+  container.innerHTML=html;
+  container.querySelectorAll('[data-alt]').forEach(el=>{
+    el.onclick=()=>selectAlternative(el.dataset.alt);
+  });
+}
+
+function selectAlternative(name){
+  const dk=dateKeyForDay(altPickerDay);
+  if(!state.sessions[dk])state.sessions[dk]={};
+  if(!state.sessions[dk][altPickerDay])state.sessions[dk][altPickerDay]={};
+  const dayData=state.sessions[dk][altPickerDay];
+
+  if(!dayData[altPickerSlotId])dayData[altPickerSlotId]={};
+
+  if(name===altPickerOrigName){
+    delete dayData[altPickerSlotId].activeAlt;
+  }else{
+    const aid=makeAltId(name);
+    dayData[altPickerSlotId].activeAlt=aid;
+    if(!dayData[aid])dayData[aid]={_name:name,sets:[],notes:'',approach:false,tech:[],skipped:false};
+    else if(!dayData[aid]._name)dayData[aid]._name=name;
+    if(!state.customAlternatives)state.customAlternatives={};
+    if(!state.customAlternatives[altPickerSlotId])state.customAlternatives[altPickerSlotId]=[];
+    if(!state.customAlternatives[altPickerSlotId].includes(name)){
+      state.customAlternatives[altPickerSlotId].push(name);
+    }
+  }
+
+  save();
+  closeModal('modalAltPicker');
+  renderTraining();
+}
+
 function renderDaySelector(){
   const sel=document.getElementById('daySelector');
   sel.innerHTML='';
@@ -77,23 +179,21 @@ function renderTraining(){
     };
     const modified=Object.keys(override).length>0;
 
-    if(!sessionData[ex.id]){
-      sessionData[ex.id]={
-        sets:Array(ex.sets).fill(null).map(()=>({w:'',r:'',d:false})),
-        notes:'',
-        approach:false,
-        tech:[],
-        skipped:false,
-      };
-    }
-    const data=sessionData[ex.id];
+    if(!sessionData[exOrig.id])sessionData[exOrig.id]={};
+    const activeAlt=sessionData[exOrig.id].activeAlt||null;
+    const dataKey=activeAlt||exOrig.id;
+    const dispName=(activeAlt&&sessionData[activeAlt]&&sessionData[activeAlt]._name)||ex.name;
+
+    if(!sessionData[dataKey])sessionData[dataKey]={};
+    const data=sessionData[dataKey];
+    if(!data.sets)data.sets=Array(ex.sets).fill(null).map(()=>({w:'',r:'',d:false}));
     if(data.approach===undefined)data.approach=false;
     if(!data.tech)data.tech=[];
     if(data.skipped===undefined)data.skipped=false;
     while(data.sets.length<ex.sets)data.sets.push({w:'',r:'',d:false});
     while(data.sets.length>ex.sets)data.sets.pop();
 
-    const lastSession=findLastSessionForDay(ex.id,day,dateKey);
+    const lastSession=findLastSessionForDay(dataKey,day,dateKey);
     const allDone=data.sets.every(s=>s.d);
     const isTime=(override.type?override.type:exOrig.type)==='time';
 
@@ -103,7 +203,7 @@ function renderTraining(){
         <div class="set-row" style="grid-template-columns:32px 1fr 40px">
           <div class="set-label">${i+1}</div>
           <div style="font-size:12px;color:var(--muted);padding:8px">${ex.reps}</div>
-          <button class="set-check ${s.d?'done':''}" onclick="toggleDone(${day},'${ex.id}',${i},${ex.rest})">${s.d?'✓':''}</button>
+          <button class="set-check ${s.d?'done':''}" onclick="toggleDone(${day},'${dataKey}',${i},${ex.rest})">${s.d?'✓':''}</button>
         </div>
       `).join('');
     }else{
@@ -116,9 +216,9 @@ function renderTraining(){
         return `
           <div class="set-row">
             <div class="set-label">${i+1}</div>
-            <input type="number" step="0.5" inputmode="decimal" class="set-input ${wClass}" placeholder="${phW}" value="${s.w}" oninput="updateSetCascade(${day},'${ex.id}',${i},'w',this.value)" data-field="w" data-idx="${i}">
-            <input type="number" inputmode="numeric" class="set-input ${rClass}" placeholder="${phR}" value="${s.r}" oninput="updateSetCascade(${day},'${ex.id}',${i},'r',this.value)" data-field="r" data-idx="${i}">
-            <button class="set-check ${s.d?'done':''}" onclick="toggleDone(${day},'${ex.id}',${i},${ex.rest})">${s.d?'✓':''}</button>
+            <input type="number" step="0.5" inputmode="decimal" class="set-input ${wClass}" placeholder="${phW}" value="${s.w}" oninput="updateSetCascade(${day},'${dataKey}',${i},'w',this.value)" data-field="w" data-idx="${i}">
+            <input type="number" inputmode="numeric" class="set-input ${rClass}" placeholder="${phR}" value="${s.r}" oninput="updateSetCascade(${day},'${dataKey}',${i},'r',this.value)" data-field="r" data-idx="${i}">
+            <button class="set-check ${s.d?'done':''}" onclick="toggleDone(${day},'${dataKey}',${i},${ex.rest})">${s.d?'✓':''}</button>
           </div>
         `;
       }).join('');
@@ -135,8 +235,7 @@ function renderTraining(){
         }).join('')}</div>`
       : '';
 
-    const alts=ALTERNATIVES[exOrig.id];
-    const altHTML=alts?`<button class="btn-sm" onclick="showAlternatives(${day},'${ex.id}')">🔄 Alternativa</button>`:'';
+    const altHTML=`<button class="btn-sm${activeAlt?' primary':''}" onclick="openAltPicker(${day},'${exOrig.id}',this.closest('.exercise').dataset.origname)">🔄 Alternativa</button>`;
 
     const isCustom=ex.id.startsWith('custom_')||exOrig.custom;
     const deleteHTML=isCustom?`<button class="btn-sm danger" onclick="deleteCustomExercise(${day},'${ex.id}')">🗑️</button>`:'';
@@ -144,17 +243,18 @@ function renderTraining(){
 
     const card=document.createElement('div');
     card.className='exercise'+(allDone&&!data.skipped?' done':'')+(data.skipped?' skipped':'');
-    card.dataset.exid=ex.id;
+    card.dataset.exid=dataKey;
+    card.dataset.origname=exOrig.name;
     card.innerHTML=`
       <div class="exercise-head">
         <div style="flex:1;min-width:0">
           <div class="ex-name-row">
-            <div class="exercise-name">${escapeHTML(ex.name)}</div>
-            ${exBest[exOrig.id]?`<span class="ex-pr-badge">🏆 ${exBest[exOrig.id].w}kg×${exBest[exOrig.id].r}</span>`:''}
+            <div class="exercise-name">${escapeHTML(dispName)}</div>
+            ${exBest[dataKey]?`<span class="ex-pr-badge">🏆 ${exBest[dataKey].w}kg×${exBest[dataKey].r}</span>`:''}
           </div>
           <div class="prescr-chips">
-            <span class="prescr-chip ${modified&&(override.sets||override.reps)?'modified':''}" onclick="openEditModal(${day},'${ex.id}')">${ex.sets}×${ex.reps} <span class="pencil">✎</span></span>
-            ${ex.rest?`<span class="prescr-chip ${modified&&override.rest!=null?'modified':''}" onclick="openEditModal(${day},'${ex.id}')">⏱ ${formatTime(ex.rest)} <span class="pencil">✎</span></span>`:''}
+            <span class="prescr-chip ${modified&&(override.sets||override.reps)?'modified':''}" onclick="openEditModal(${day},'${exOrig.id}')">${ex.sets}×${ex.reps} <span class="pencil">✎</span></span>
+            ${ex.rest?`<span class="prescr-chip ${modified&&override.rest!=null?'modified':''}" onclick="openEditModal(${day},'${exOrig.id}')">⏱ ${formatTime(ex.rest)} <span class="pencil">✎</span></span>`:''}
             ${ex.hint?`<span class="prescr-chip" style="color:var(--muted);border-color:var(--border)">${ex.hint}</span>`:''}
             ${customBadge}
             ${data.skipped?`<span class="prescr-chip" style="color:var(--red);border-color:var(--red)">NO HECHO</span>`:''}
@@ -163,7 +263,7 @@ function renderTraining(){
         </div>
         <div class="exercise-num">${String(idx+1).padStart(2,'0')}</div>
       </div>
-      <div class="approach-row ${data.approach?'done':''}" onclick="toggleApproach(${day},'${ex.id}')">
+      <div class="approach-row ${data.approach?'done':''}" onclick="toggleApproach(${day},'${dataKey}')">
         <div class="approach-check">${data.approach?'✓':''}</div>
         <div style="flex:1">Aproximación realizada</div>
         <button class="btn-sm" style="margin:0;padding:3px 10px;font-size:10px" onclick="event.stopPropagation();startTimer(state.approachTimerSec||120)">⏱ ${formatTime(state.approachTimerSec||120)}</button>
@@ -177,13 +277,13 @@ function renderTraining(){
       <div class="ex-actions">
         ${!data.skipped&&ex.rest?`<button class="btn-sm" onclick="startTimer(${ex.rest})">⏱ ${formatTime(ex.rest)}</button>`:''}
         ${!data.skipped?altHTML:''}
-        <button class="btn-sm" onclick="toggleNotes('${ex.id}')">📝 Notas</button>
-        ${!data.skipped?`<button class="btn-sm ${data.tech.length?'primary':''}" onclick="openTechModal(${day},'${ex.id}')">⚡ Técnicas${data.tech.length?' ('+data.tech.length+')':''}</button>`:''}
-        <button class="btn-sm ${data.skipped?'danger':''}" onclick="toggleSkipped(${day},'${ex.id}')">${data.skipped?'↩ Deshacer':'⊘ No hecho'}</button>
+        <button class="btn-sm" onclick="toggleNotes('${dataKey}')">📝 Notas</button>
+        ${!data.skipped?`<button class="btn-sm ${data.tech.length?'primary':''}" onclick="openTechModal(${day},'${dataKey}')">⚡ Técnicas${data.tech.length?' ('+data.tech.length+')':''}</button>`:''}
+        <button class="btn-sm ${data.skipped?'danger':''}" onclick="toggleSkipped(${day},'${dataKey}')">${data.skipped?'↩ Deshacer':'⊘ No hecho'}</button>
         ${deleteHTML}
       </div>
-      <div class="notes-area" id="notes-${ex.id}">
-        <textarea placeholder="${data.skipped?'Motivo (dolor, tiempo, etc.)…':'Cómo fue la serie, técnica, sensaciones…'}" oninput="updateNotes(${day},'${ex.id}',this.value)">${escapeHTML(data.notes||'')}</textarea>
+      <div class="notes-area" id="notes-${dataKey}">
+        <textarea placeholder="${data.skipped?'Motivo (dolor, tiempo, etc.)…':'Cómo fue la serie, técnica, sensaciones…'}" oninput="updateNotes(${day},'${dataKey}',this.value)">${escapeHTML(data.notes||'')}</textarea>
       </div>
     `;
     list.appendChild(card);
@@ -268,29 +368,6 @@ function toggleNotes(exId){
   document.getElementById('notes-'+exId).classList.toggle('open');
 }
 
-function showAlternatives(day,exId){
-  const alts=ALTERNATIVES[exId];
-  if(!alts||!alts.length)return;
-  const dk=dateKeyForDay(day);
-  const orig=ROUTINE[day].exercises.find(e=>e.id===exId);
-  const current=(state.sessions[dk]&&state.sessions[dk][day]&&state.sessions[dk][day][exId]&&state.sessions[dk][day][exId].override&&state.sessions[dk][day][exId].override.name)||orig.name;
-  const options=[orig.name,...alts];
-  const idx=options.indexOf(current);
-  const next=options[(idx+1)%options.length];
-  if(!state.sessions[dk])state.sessions[dk]={};
-  if(!state.sessions[dk][day])state.sessions[dk][day]={};
-  if(!state.sessions[dk][day][exId])state.sessions[dk][day][exId]={sets:[],notes:'',approach:false,tech:[]};
-  if(!state.sessions[dk][day][exId].override)state.sessions[dk][day][exId].override={};
-  if(next===orig.name){
-    delete state.sessions[dk][day][exId].override.name;
-    if(!Object.keys(state.sessions[dk][day][exId].override).length)delete state.sessions[dk][day][exId].override;
-  }else{
-    state.sessions[dk][day][exId].override.name=next;
-  }
-  save();
-  renderTraining();
-  toast(next);
-}
 
 let addExDay=null;
 
