@@ -24,11 +24,12 @@ function importData(e){
 }
 
 function resetRoutine(){
-  if(!confirm('¿Resetear la rutina? Tu historial de pesos y datos no se borran.'))return;
+  if(!confirm('¿Resetear la rutina? Tu historial de pesos y datos no se borran, solo la rutina vuelve a los valores originales.'))return;
+  delete state.customRoutine;
   state.customRoutine={};
   save();
   renderTraining();
-  toast('Rutina reseteada a valores originales');
+  toast('Rutina reseteada ✓');
 }
 
 function confirmWipe(){

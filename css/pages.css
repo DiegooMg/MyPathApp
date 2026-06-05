@@ -403,11 +403,17 @@
 .editor-ex-item.custom-persist{
   border-color:var(--green);
 }
-.editor-ex-drag{
-  color:var(--dim);
-  font-size:16px;
-  cursor:grab;
-  padding:0 4px;
+.editor-ex-arrow{
+  width:28px;
+  height:28px;
+  background:var(--card-2);
+  color:var(--accent-2);
+  border-radius:6px;
+  font-size:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
 }
 .editor-ex-name{flex:1;min-width:0}
 .editor-ex-badge{

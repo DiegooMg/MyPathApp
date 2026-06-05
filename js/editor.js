@@ -132,22 +132,24 @@ function renderEditorExList(){
     list.innerHTML='<div style="color:var(--muted);font-size:12px;padding:10px">Sin ejercicios. Añadí de la biblioteca.</div>';
     return;
   }
-  const dragStyle=editorSortLocked?'color:var(--dim);cursor:default':'color:var(--accent);cursor:grab';
+  const n=exercises.length;
   list.innerHTML=exercises.map((ex,idx)=>{
     const isCustom=ex.id&&ex.id.startsWith('custom_');
     return `
-      <div class="editor-ex-item${isCustom?' custom-persist':''}" data-sortable="true" style="${editorSortLocked?'':'touch-action:none'}">
-        <span class="editor-ex-drag sort-handle" style="${dragStyle}">⠿</span>
+      <div class="editor-ex-item${isCustom?' custom-persist':''}">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <button class="editor-ex-arrow" onclick="moveEx(${editorDay},${idx},-1)"${idx===0?' disabled style="opacity:.3"':''}>▲</button>
+          <button class="editor-ex-arrow" onclick="moveEx(${editorDay},${idx},1)"${idx===n-1?' disabled style="opacity:.3"':''}>▼</button>
+        </div>
         <div class="editor-ex-name">
           <div style="font-size:13px">${escapeHTML(ex.name)}</div>
           <div style="font-size:10px;color:var(--muted);margin-top:2px">${ex.sets}×${ex.reps}${ex.rest?' · '+formatTime(ex.rest):''}</div>
         </div>
         ${isCustom?'<span class="editor-ex-badge">Custom</span>':''}
-        <button class="editor-ex-del" onclick="removeExFromDay(${editorDay},'${ex.id}',${isCustom})">✕</button>
+        <button class="editor-ex-del" data-name="${escapeHTML(ex.name)}" onclick="removeExFromDay(${editorDay},'${ex.id}',${isCustom},this.dataset.name)">✕</button>
       </div>
     `;
   }).join('');
-  makeSortable(list,reorderExercises,'y','.sort-handle');
 }
 
 function reorderExercises(fromIdx,toIdx){
@@ -165,7 +167,20 @@ function reorderExercises(fromIdx,toIdx){
   toast('Orden actualizado');
 }
 
-function removeExFromDay(day,exId,isCustom){
+function moveEx(day,fromIdx,dir){
+  ensureCustomRoutine(day);
+  const allEx=getEditorExercises(day);
+  const toIdx=fromIdx+dir;
+  if(toIdx<0||toIdx>=allEx.length)return;
+  [allEx[fromIdx],allEx[toIdx]]=[allEx[toIdx],allEx[fromIdx]];
+  state.customRoutine[day].exercises=allEx;
+  if(state.customExercises&&state.customExercises[day])delete state.customExercises[day];
+  save();
+  renderEditorExList();
+}
+
+function removeExFromDay(day,exId,isCustom,exName){
+  if(!confirm(`¿Eliminar "${exName}"? Esta acción no se puede deshacer.`))return;
   ensureCustomRoutine(day);
   const inRoutine=state.customRoutine[day].exercises.some(e=>e.id===exId);
   state.customRoutine[day].exercises=state.customRoutine[day].exercises.filter(e=>e.id!==exId);
