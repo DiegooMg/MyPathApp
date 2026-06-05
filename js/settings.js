@@ -23,6 +23,14 @@ function importData(e){
   r.readAsText(file);
 }
 
+function resetRoutine(){
+  if(!confirm('¿Resetear la rutina? Tu historial de pesos y datos no se borran.'))return;
+  state.customRoutine={};
+  save();
+  renderTraining();
+  toast('Rutina reseteada a valores originales');
+}
+
 function confirmWipe(){
   if(!confirm('¿Borrar TODOS los datos? No se puede deshacer.'))return;
   if(!confirm('¿Seguro? Perderás todo el historial.'))return;

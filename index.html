@@ -368,6 +368,13 @@
       <div class="accent">→</div>
       <input type="file" accept=".json" style="display:none" onchange="importData(event)">
     </label>
+    <button class="setting-item" style="width:100%;text-align:left;color:var(--accent-2)" onclick="resetRoutine()">
+      <div>
+        <div>↩️ Resetear rutina</div>
+        <div class="desc">Vuelve a la rutina original — historial intacto</div>
+      </div>
+      <div style="color:var(--accent-2)">→</div>
+    </button>
     <button class="setting-item danger" style="width:100%;text-align:left" onclick="confirmWipe()">
       <div>
         <div>🗑️ Borrar todo</div>
